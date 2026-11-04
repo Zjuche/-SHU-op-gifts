@@ -1,0 +1,22 @@
+ORG 00H
+MAIN:
+LD A,#55H
+OUTA
+延时
+延时
+延时
+延时
+LD A,#22H
+OUTA
+延时
+延时
+延时
+延时
+LD A,#55H
+A-W A,#22H
+OUTA
+延时
+延时
+延时
+延时
+跳到 MAIN

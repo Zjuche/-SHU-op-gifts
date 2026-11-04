@@ -1,0 +1,162 @@
+-- 创建数据库
+CREATE DATABASE LibraryDB;
+USE LibraryDB;
+
+-- 员工表
+CREATE TABLE EMPLOYEE (
+    EmployeeID VARCHAR(10) PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Phone VARCHAR(15),
+    Email VARCHAR(50) NOT NULL
+);
+
+-- 书目表
+CREATE TABLE CATALOG (
+    ISBN VARCHAR(20) PRIMARY KEY,
+    Title VARCHAR(100) NOT NULL,
+    Author VARCHAR(50) NOT NULL,
+    Publisher VARCHAR(50) NOT NULL,
+    PubDate DATE NOT NULL,
+    TotalCount INT NOT NULL
+);
+
+-- 图书表
+CREATE TABLE BOOK (
+    BookID INT AUTO_INCREMENT PRIMARY KEY,
+    ISBN VARCHAR(20) NOT NULL,
+    Location VARCHAR(50) NOT NULL,
+    Status ENUM('未借出','已借出','已预约','不外借') DEFAULT '未借出',
+    FOREIGN KEY (ISBN) REFERENCES CATALOG(ISBN)
+);
+
+-- 借阅记录表
+CREATE TABLE BORROW_RECORD (
+    BorrowID INT AUTO_INCREMENT PRIMARY KEY,
+    EmployeeID VARCHAR(10) NOT NULL,
+    BookID INT NOT NULL,
+    BorrowDate DATE NOT NULL,
+    DueDate DATE NOT NULL,
+    ReturnDate DATE,
+    Fine DECIMAL(10,2) DEFAULT 0.00,
+    FOREIGN KEY (EmployeeID) REFERENCES EMPLOYEE(EmployeeID),
+    FOREIGN KEY (BookID) REFERENCES BOOK(BookID)
+);
+
+-- 预约记录表
+CREATE TABLE RESERVATION (
+    ReserveID INT AUTO_INCREMENT PRIMARY KEY,
+    EmployeeID VARCHAR(10) NOT NULL,
+    ISBN VARCHAR(20) NOT NULL,
+    ReserveDate DATE NOT NULL,
+    ExpireDate DATE NOT NULL,
+    BookID INT,
+    FOREIGN KEY (EmployeeID) REFERENCES EMPLOYEE(EmployeeID),
+    FOREIGN KEY (ISBN) REFERENCES CATALOG(ISBN),
+    FOREIGN KEY (BookID) REFERENCES BOOK(BookID)
+);
+
+-- 系统配置表
+CREATE TABLE SYSTEM_CONFIG (
+    ConfigID INT PRIMARY KEY DEFAULT 1,
+    FinePerDay DECIMAL(10,2) NOT NULL DEFAULT 1.00,
+    MaxBorrowDays INT NOT NULL DEFAULT 60,
+    MaxReserveDays INT NOT NULL DEFAULT 7
+);
+
+-- 插入测试数据
+INSERT INTO EMPLOYEE (EmployeeID, Name, Phone, Email) VALUES
+('E001', '张三', '13800138000', 'zhangsan@company.com'),
+('E002', '李四', '13900139000', 'lisi@company.com'),
+('E003', '王五', '13700137000', 'wangwu@company.com');
+
+INSERT INTO CATALOG (ISBN, Title, Author, Publisher, PubDate, TotalCount) VALUES
+('9787111128064', '数据库系统概论', '王珊', '机械工业出版社', '2020-01-01', 3),
+('9787302173945', '计算机网络', '谢希仁', '电子工业出版社', '2019-05-01', 2),
+('9787508472980', '操作系统', '汤小丹', '人民邮电出版社', '2021-08-01', 1);
+
+INSERT INTO BOOK (ISBN, Location, Status) VALUES
+('9787111128064', '流通室A排1架', '未借出'),
+('9787111128064', '流通室A排1架', '未借出'),
+('9787111128064', '阅览室B区', '不外借'),
+('9787302173945', '流通室C排2架', '已借出'),
+('9787302173945', '流通室C排2架', '未借出'),
+('9787508472980', '流通室D排3架', '已借出');
+
+INSERT INTO BORROW_RECORD (EmployeeID, BookID, BorrowDate, DueDate, ReturnDate) VALUES
+('E002', 4, '2023-10-01', '2023-12-01', NULL),
+('E001', 6, '2023-10-15', '2023-12-15', NULL);
+
+INSERT INTO RESERVATION (EmployeeID, ISBN, ReserveDate, ExpireDate, BookID) VALUES
+('E003', '9787302173945', '2023-10-20', '2023-10-27', NULL),
+('E001', '9787508472980', '2023-10-18', '2023-10-25', NULL);
+
+INSERT INTO SYSTEM_CONFIG (ConfigID, FinePerDay, MaxBorrowDays, MaxReserveDays) 
+VALUES (1, 1.00, 60, 7);
+
+
+
+-- 1. 入库管理：添加新书
+INSERT INTO CATALOG (ISBN, Title, Author, Publisher, PubDate, TotalCount)
+VALUES ('9787040510380', '软件工程', '张海藩', '高等教育出版社', '2023-03-01', 2);
+
+INSERT INTO BOOK (ISBN, Location, Status) VALUES
+('9787040510380', '流通室E排4架', '未借出'),
+('9787040510380', '流通室E排4架', '未借出');
+
+-- 2. 借书操作
+START TRANSACTION;
+INSERT INTO BORROW_RECORD (EmployeeID, BookID, BorrowDate, DueDate)
+VALUES ('E003', 1, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 60 DAY));
+
+UPDATE BOOK SET Status = '已借出' WHERE BookID = 1;
+COMMIT;
+
+-- 3. 预约操作
+INSERT INTO RESERVATION (EmployeeID, ISBN, ReserveDate, ExpireDate)
+VALUES ('E002', '9787508472980', CURDATE(), DATE_ADD(CURDATE(), INTERVAL 7 DAY));
+
+-- 4. 还书操作（含超期罚款）
+START TRANSACTION;
+UPDATE BORROW_RECORD 
+SET ReturnDate = CURDATE(),
+    Fine = (SELECT FinePerDay FROM SYSTEM_CONFIG) * 
+           DATEDIFF(CURDATE(), '2023-12-01')
+WHERE BookID = 4 AND ReturnDate IS NULL;
+
+-- 检查预约并分配图书
+UPDATE RESERVATION SET BookID = 4 
+WHERE ISBN = (SELECT ISBN FROM BOOK WHERE BookID = 4)
+  AND BookID IS NULL
+  AND ExpireDate >= CURDATE()
+ORDER BY ReserveDate
+LIMIT 1;
+
+UPDATE BOOK SET Status = 
+  IF((SELECT COUNT(*) FROM RESERVATION WHERE BookID = 4) > 0, 
+     '已预约', '未借出')
+WHERE BookID = 4;
+COMMIT;
+
+-- 5. 通知处理
+-- 到期未归还通知
+SELECT e.Email, b.BookID, c.Title, br.DueDate
+FROM BORROW_RECORD br
+JOIN EMPLOYEE e ON br.EmployeeID = e.EmployeeID
+JOIN BOOK b ON br.BookID = b.BookID
+JOIN CATALOG c ON b.ISBN = c.ISBN
+WHERE br.ReturnDate IS NULL AND br.DueDate < CURDATE();
+
+-- 预约到书通知
+SELECT r.EmployeeID, e.Email, c.Title, b.BookID
+FROM RESERVATION r
+JOIN EMPLOYEE e ON r.EmployeeID = e.EmployeeID
+JOIN CATALOG c ON r.ISBN = c.ISBN
+JOIN BOOK b ON r.BookID = b.BookID
+WHERE r.BookID IS NOT NULL 
+  AND r.ExpireDate >= CURDATE()
+  AND b.Status = '已预约';
+
+-- 6. 系统设置更新
+UPDATE SYSTEM_CONFIG 
+SET FinePerDay = 1.50, MaxBorrowDays = 45
+WHERE ConfigID = 1;

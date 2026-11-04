@@ -1,0 +1,327 @@
+数据库建表脚本
+-- 创建数据库
+CREATE DATABASE IF NOT EXISTS LibrarySystem;
+USE LibrarySystem;
+
+-- 员工表
+CREATE TABLE Employee (
+    EmployeeID VARCHAR(20) PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Phone VARCHAR(20),
+    Email VARCHAR(100) NOT NULL,
+    INDEX idx_email (Email)  -- 为通知功能优化查询
+);
+
+-- 书目表
+CREATE TABLE Catalogue (
+    ISBN VARCHAR(20) PRIMARY KEY,
+    Title VARCHAR(200) NOT NULL,
+    Author VARCHAR(100) NOT NULL,
+    Publisher VARCHAR(100),
+    PublishDate DATE,
+    TotalCopies INT DEFAULT 0,
+    INDEX idx_title (Title)  -- 优化搜索
+);
+
+-- 图书表
+CREATE TABLE Book (
+    BookID VARCHAR(20) PRIMARY KEY,
+    ISBN VARCHAR(20) NOT NULL,
+    Location VARCHAR(50) NOT NULL,
+    Status ENUM('未借出', '已借出', '已预约', '不外借') DEFAULT '未借出',
+    FOREIGN KEY (ISBN) REFERENCES Catalogue(ISBN) ON DELETE CASCADE
+);
+
+-- 借阅记录表
+CREATE TABLE Borrow (
+    BorrowID INT AUTO_INCREMENT PRIMARY KEY,
+    EmployeeID VARCHAR(20) NOT NULL,
+    BookID VARCHAR(20) NOT NULL,
+    BorrowDate DATE NOT NULL,
+    ReturnDate DATE,
+    LibrarianID VARCHAR(20) NOT NULL,
+    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
+    FOREIGN KEY (BookID) REFERENCES Book(BookID),
+    FOREIGN KEY (LibrarianID) REFERENCES Employee(EmployeeID),
+    INDEX idx_borrowdate (BorrowDate)  -- 优化超期查询
+);
+
+-- 预约记录表
+CREATE TABLE Reservation (
+    ReservationID INT AUTO_INCREMENT PRIMARY KEY,
+    EmployeeID VARCHAR(20) NOT NULL,
+    ISBN VARCHAR(20) NOT NULL,
+    ReserveDate DATE NOT NULL,
+    ExpiryDate DATE NOT NULL,
+    BookID VARCHAR(20) DEFAULT NULL,
+    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
+    FOREIGN KEY (ISBN) REFERENCES Catalogue(ISBN),
+    FOREIGN KEY (BookID) REFERENCES Book(BookID),
+    INDEX idx_expirydate (ExpiryDate)  -- 优化过期清理
+);
+
+-- 系统设置表（单行记录）
+CREATE TABLE SystemSetting (
+    SettingID INT PRIMARY KEY DEFAULT 1,  -- 固定ID确保单行
+    FineRate DECIMAL(5,2) NOT NULL DEFAULT 0.50,
+    MaxBorrowDays INT NOT NULL DEFAULT 60,
+    MaxReserveDays INT NOT NULL DEFAULT 7,
+    CHECK (SettingID = 1)  -- 强制单行约束
+);
+
+-- 初始化系统设置
+INSERT INTO SystemSetting (FineRate, MaxBorrowDays, MaxReserveDays) 
+VALUES (0.50, 60, 7);
+核心存储过程
+实现主要业务逻辑的存储过程：
+
+1. 入库管理
+DELIMITER //
+CREATE PROCEDURE AddBook(
+    IN p_BookID VARCHAR(20),
+    IN p_ISBN VARCHAR(20),
+    IN p_Location VARCHAR(50),
+    IN p_Status ENUM('未借出','已借出','已预约','不外借'),
+    IN p_Title VARCHAR(200),
+    IN p_Author VARCHAR(100),
+    IN p_Publisher VARCHAR(100),
+    IN p_PublishDate DATE
+)
+BEGIN
+    -- 检查书目是否存在
+    IF NOT EXISTS (SELECT 1 FROM Catalogue WHERE ISBN = p_ISBN) THEN
+        -- 新建书目
+        INSERT INTO Catalogue (ISBN, Title, Author, Publisher, PublishDate, TotalCopies)
+        VALUES (p_ISBN, p_Title, p_Author, p_Publisher, p_PublishDate, 0);
+    END IF;
+
+    -- 添加图书
+    INSERT INTO Book (BookID, ISBN, Location, Status)
+    VALUES (p_BookID, p_ISBN, p_Location, p_Status);
+
+    -- 更新书目册数
+    UPDATE Catalogue SET TotalCopies = TotalCopies + 1 WHERE ISBN = p_ISBN;
+END //
+DELIMITER ;
+2. 借书管理
+DELIMITER //
+CREATE PROCEDURE BorrowBook(
+    IN p_EmployeeID VARCHAR(20),
+    IN p_BookID VARCHAR(20),
+    IN p_LibrarianID VARCHAR(20)
+)
+BEGIN
+    DECLARE v_MaxBooks INT DEFAULT 10;
+    DECLARE v_CurrentBorrow INT;
+
+    -- 检查借阅数量限制
+    SELECT COUNT(*) INTO v_CurrentBorrow 
+    FROM Borrow 
+    WHERE EmployeeID = p_EmployeeID AND ReturnDate IS NULL;
+
+    IF v_CurrentBorrow >= v_MaxBooks THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '已达最大借阅数量';
+    END IF;
+
+    -- 检查图书状态
+    IF (SELECT Status FROM Book WHERE BookID = p_BookID) != '未借出' THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '图书不可借';
+    END IF;
+
+    -- 创建借阅记录
+    INSERT INTO Borrow (EmployeeID, BookID, BorrowDate, LibrarianID)
+    VALUES (p_EmployeeID, p_BookID, CURDATE(), p_LibrarianID);
+
+    -- 更新图书状态
+    UPDATE Book SET Status = '已借出' WHERE BookID = p_BookID;
+END //
+DELIMITER ;
+3. 预约管理
+DELIMITER //
+CREATE PROCEDURE MakeReservation(
+    IN p_EmployeeID VARCHAR(20),
+    IN p_ISBN VARCHAR(20)
+)
+BEGIN
+    DECLARE v_MaxReserveDays INT;
+    
+    -- 获取系统设置
+    SELECT MaxReserveDays INTO v_MaxReserveDays FROM SystemSetting;
+    
+    -- 检查是否有可借图书
+    IF EXISTS (
+        SELECT 1 FROM Book 
+        WHERE ISBN = p_ISBN AND Status = '未借出'
+    ) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '存在可借图书，无需预约';
+    END IF;
+
+    -- 创建预约记录
+    INSERT INTO Reservation (EmployeeID, ISBN, ReserveDate, ExpiryDate)
+    VALUES (p_EmployeeID, p_ISBN, CURDATE(), DATE_ADD(CURDATE(), INTERVAL v_MaxReserveDays DAY));
+END //
+DELIMITER ;
+4. 还书管理
+DELIMITER //
+CREATE PROCEDURE ReturnBook(
+    IN p_BookID VARCHAR(20)
+)
+BEGIN
+    DECLARE v_BorrowID INT;
+    DECLARE v_ISBN VARCHAR(20);
+    DECLARE v_FineRate DECIMAL(5,2);
+    DECLARE v_MaxBorrowDays INT;
+    DECLARE v_FineAmount DECIMAL(8,2) DEFAULT 0;
+    DECLARE v_ReservationExists BOOLEAN DEFAULT FALSE;
+
+    -- 获取借阅记录ID和ISBN
+    SELECT BorrowID, ISBN INTO v_BorrowID, v_ISBN 
+    FROM Borrow JOIN Book USING(BookID)
+    WHERE BookID = p_BookID AND ReturnDate IS NULL;
+
+    -- 获取系统设置
+    SELECT FineRate, MaxBorrowDays INTO v_FineRate, v_MaxBorrowDays 
+    FROM SystemSetting;
+
+    -- 计算罚金（如果超期）
+    UPDATE Borrow
+    SET ReturnDate = CURDATE()
+    WHERE BorrowID = v_BorrowID;
+
+    -- 计算超期天数
+    SET v_FineAmount = GREATEST(
+        0, 
+        DATEDIFF(CURDATE(), DATE_ADD(BorrowDate, INTERVAL v_MaxBorrowDays DAY)) * v_FineRate
+    );
+    
+    -- 检查预约
+    IF EXISTS (
+        SELECT 1 FROM Reservation 
+        WHERE ISBN = v_ISBN AND ExpiryDate > CURDATE() AND BookID IS NULL
+    ) THEN
+        -- 分配到最早的预约
+        UPDATE Reservation
+        SET BookID = p_BookID
+        WHERE ISBN = v_ISBN AND BookID IS NULL
+        ORDER BY ReserveDate ASC
+        LIMIT 1;
+        
+        UPDATE Book SET Status = '已预约' WHERE BookID = p_BookID;
+        SET v_ReservationExists = TRUE;
+    ELSE
+        UPDATE Book SET Status = '未借出' WHERE BookID = p_BookID;
+    END IF;
+
+    -- 返回罚金信息
+    SELECT v_FineAmount AS FineAmount, v_ReservationExists AS HasReservation;
+END //
+DELIMITER ;
+自动通知功能实现
+使用MySQL事件调度器实现每日通知（需启用事件调度器）:
+
+1. 超期通知事件
+DELIMITER //
+CREATE PROCEDURE SendOverdueNotifications()
+BEGIN
+    DECLARE v_MaxBorrowDays INT;
+    SELECT MaxBorrowDays INTO v_MaxBorrowDays FROM SystemSetting;
+    
+    -- 获取超期未还记录
+    SELECT e.Email, b.Title, br.BorrowDate
+    FROM Borrow br
+    JOIN Book bk ON br.BookID = bk.BookID
+    JOIN Catalogue b ON bk.ISBN = b.ISBN
+    JOIN Employee e ON br.EmployeeID = e.EmployeeID
+    WHERE br.ReturnDate IS NULL
+    AND br.BorrowDate <= DATE_SUB(CURDATE(), INTERVAL v_MaxBorrowDays DAY);
+    
+    -- 实际应用中此处应调用邮件接口
+END //
+DELIMITER ;
+
+-- 预约到货通知
+DELIMITER //
+CREATE PROCEDURE SendReservationNotifications()
+BEGIN
+    -- 获取已分配图书的预约
+    SELECT e.Email, c.Title
+    FROM Reservation r
+    JOIN Catalogue c ON r.ISBN = c.ISBN
+    JOIN Employee e ON r.EmployeeID = e.EmployeeID
+    WHERE r.BookID IS NOT NULL
+    AND r.ExpiryDate > CURDATE();
+    
+    -- 实际应用中此处应调用邮件接口
+END //
+DELIMITER ;
+
+-- 创建每日任务
+CREATE EVENT IF NOT EXISTS DailyNotifications
+ON SCHEDULE EVERY 1 DAY STARTS '2024-01-01 03:00:00'
+DO
+BEGIN
+    CALL SendOverdueNotifications();
+    CALL SendReservationNotifications();
+END;
+2. 定期清理过期预约
+DELIMITER //
+CREATE PROCEDURE CleanExpiredReservations()
+BEGIN
+    -- 释放图书状态
+    UPDATE Book
+    SET Status = '未借出'
+    WHERE BookID IN (
+        SELECT BookID FROM Reservation
+        WHERE ExpiryDate <= CURDATE()
+        AND BookID IS NOT NULL
+    );
+    
+    -- 删除过期预约
+    DELETE FROM Reservation WHERE ExpiryDate <= CURDATE();
+END //
+DELIMITER ;
+
+-- 创建每日清理任务
+CREATE EVENT IF NOT EXISTS DailyCleanup
+ON SCHEDULE EVERY 1 DAY STARTS '2024-01-01 04:00:00'
+DO
+BEGIN
+    CALL CleanExpiredReservations();
+END;
+使用示例命令
+1. 管理员添加图书
+-- 添加新书目和新书
+CALL AddBook(
+    'BK1001', 
+    '9781234567890', 
+    '流通室-A架', 
+    '未借出',
+    '数据库系统概论',
+    '王珊',
+    '高等教育出版社',
+    '2023-01-01'
+);
+
+-- 添加同一书目的另一本书
+CALL AddBook(
+    'BK1002', 
+    '9781234567890', 
+    '流通室-B架', 
+    '未借出',
+    NULL, NULL, NULL, NULL  -- 书目信息可省略
+);
+2. 员工借阅图书
+-- 员工E1001借阅图书BK1001，管理员M001操作
+CALL BorrowBook('E1001', 'BK1001', 'M001');
+3. 预约图书
+-- 当某书目无库存时预约
+CALL MakeReservation('E1002', '9780000000000');
+4. 归还图书
+-- 归还图书并获取罚金信息
+CALL ReturnBook('BK1001');
+5. 系统设置修改
+-- 修改罚金为每天1元
+UPDATE SystemSetting SET FineRate = 1.00 WHERE SettingID = 1;

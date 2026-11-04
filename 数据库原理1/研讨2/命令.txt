@@ -1,0 +1,348 @@
+-- 1. 创建数据库及表结构
+DROP DATABASE IF EXISTS school;
+CREATE DATABASE school;
+USE school;
+
+-- 学院表
+CREATE TABLE Department (
+    Dno INT PRIMARY KEY AUTO_INCREMENT,
+    Dname VARCHAR(50) NOT NULL UNIQUE,
+    Dean VARCHAR(20)
+);
+
+-- 学生表
+CREATE TABLE Student (
+    Sno CHAR(9) PRIMARY KEY,
+    Sname VARCHAR(20) NOT NULL,
+    Ssex CHAR(1) CHECK (Ssex IN ('男','女')),
+    Sage TINYINT,
+    Sphone CHAR(11),
+    Email VARCHAR(50),
+    Dno INT,
+    FOREIGN KEY (Dno) REFERENCES Department(Dno)
+);
+
+-- 课程表
+CREATE TABLE Course (
+    Cno CHAR(7) PRIMARY KEY,
+    Cname VARCHAR(50) NOT NULL,
+    Credit TINYINT,
+    Dno INT,
+    FOREIGN KEY (Dno) REFERENCES Department(Dno)
+);
+
+-- 教师表
+CREATE TABLE Teacher (
+    Tno CHAR(6) PRIMARY KEY,
+    Tname VARCHAR(20) NOT NULL,
+    Title VARCHAR(20),
+    Dno INT,
+    FOREIGN KEY (Dno) REFERENCES Department(Dno)
+);
+
+-- 选课表
+CREATE TABLE SC (
+    Sno CHAR(9),
+    Cno CHAR(7),
+    Tno CHAR(6),
+    Usual_grade DECIMAL(5,2) CHECK (Usual_grade BETWEEN 0 AND 100),
+    Final_grade DECIMAL(5,2) CHECK (Final_grade BETWEEN 0 AND 100),
+    PRIMARY KEY (Sno, Cno),
+    FOREIGN KEY (Sno) REFERENCES Student(Sno),
+    FOREIGN KEY (Cno) REFERENCES Course(Cno),
+    FOREIGN KEY (Tno) REFERENCES Teacher(Tno)
+);
+
+-- 2. 插入数据
+-- 学院数据
+INSERT INTO Department (Dname, Dean) VALUES
+('计算机学院', '张伟'), ('数学学院', '李明'), ('物理学院', '王芳'),
+('化学学院', '赵刚'), ('机械学院', '刘洋'), ('经管学院', '陈静'),
+('外语学院', '杨帆'), ('法学院', '周涛'), ('医学院', '吴昊'), ('艺术学院', '郑琳');
+
+-- 学生数据
+INSERT INTO Student (Sno, Sname, Ssex, Sage, Sphone, Email, Dno) VALUES
+('202300101','张明','男',20,'13800010001','zhangming@edu.cn',1),
+('202300102','李红','女',19,'13800010002','lihong@edu.cn',1),
+('202300103','王刚','男',22,'13800010003','wanggang@edu.cn',1),
+('202300104','赵敏','女',18,'13800010004','zhaomin@edu.cn',1),
+('202300105','刘强','男',21,'13800010005','liuqiang@edu.cn',1),
+('202300201','陈晓','女',20,'13800020001','chenxiao@edu.cn',2),
+('202300202','杨帆','男',23,'13800020002','yangfan@edu.cn',2),
+('202300301','周梅','女',19,'13800030001','zhoumei@edu.cn',3),
+('202300302','钱程','男',20,'13800030002','qiancheng@edu.cn',3),
+('202300401','孙丽','女',18,'13800040001','sunli@edu.cn',4),
+('202300501','吴浩','男',24,'13800050001','wuhao@edu.cn',5),
+('202300502','郑欣','女',22,'13800050002','zhengxin@edu.cn',5),
+('202300601','周杰','男',19,'13800060001','zhoujie@edu.cn',6),
+('202300602','王芳','女',20,'13800060002','wangfang@edu.cn',6),
+('202300701','刘伟','男',21,'13800070001','liuwei@edu.cn',7),
+('202300702','陈琳','女',22,'13800070002','chenlin@edu.cn',7),
+('202300801','张伟','男',23,'13800080001','zhangwei@edu.cn',8),
+('202300802','李娜','女',18,'13800080002','lina@edu.cn',8),
+('202300901','王勇','男',25,'13800090001','wangyong@edu.cn',9),
+('202300902','孙倩','女',19,'13800090002','sunqian@edu.cn',9),
+('202301001','赵刚','男',20,'13800100001','zhaogang@edu.cn',10),
+('202301002','周婷','女',21,'13800100002','zhouting@edu.cn',10),
+('202310101','高峰','男',25,'13800110001','gaofeng@edu.cn',1),
+('202310102','林薇','女',19,'13800110002','linwei@edu.cn',1),
+('202310201','马云','男',24,'13800110003','mayun@edu.cn',2),
+('202310301','马化腾','男',23,'13800110004','mahuateng@edu.cn',3),
+('202310401','李彦宏','男',22,'13800110005','liyanhong@edu.cn',4),
+('202310501','雷军','男',21,'13800110006','leijun@edu.cn',5),
+('202310601','董明珠','女',24,'13800110007','dongmingzhu@edu.cn',6);
+
+-- 课程数据
+INSERT INTO Course (Cno, Cname, Credit, Dno) VALUES
+('CS101','数据库系统',4,1),('CS102','数据结构',4,1),('CS103','操作系统',4,1),
+('MA201','高等数学',6,2),('MA202','线性代数',3,2),('PH301','大学物理',4,3),
+('CH401','有机化学',4,4),('ME501','机械设计',5,5),('EC601','微观经济学',3,6),
+('FL701','高级英语',4,7),('LA801','宪法学',3,8),('ME502','理论力学',4,5),
+('CS104','计算机网络',4,1),('CS105','软件工程',3,1),('MA203','概率统计',3,2),
+('PH302','量子力学',4,3),('CH402','分析化学',4,4),('EC602','宏观经济学',3,6),
+('FL702','翻译实践',2,7),('LA802','民法总论',4,8);
+
+-- 教师数据
+INSERT INTO Teacher (Tno, Tname, Title, Dno) VALUES
+('T01001','张伟','教授',1),('T01002','李明','副教授',1),('T01003','王芳','讲师',1),
+('T02001','刘洋','教授',2),('T02002','陈静','副教授',2),('T03001','周涛','教授',3),
+('T04001','吴昊','副教授',4),('T05001','郑琳','教授',5),('T06001','杨帆','讲师',6),
+('T07001','赵刚','教授',7),('T08001','钱敏','副教授',8),('T09001','孙浩','教授',9),
+('T10001','李静','讲师',10),('T01004','周杰','助教',1),('T02003','王霞','教授',2);
+
+-- 选课数据
+INSERT INTO SC (Sno, Cno, Tno, Usual_grade, Final_grade) VALUES
+('202300101','CS101','T01001',65,40),('202300101','CS102','T01002',70,45),
+('202300101','CS103','T01003',80,55),('202300102','CS101','T01001',60,42),
+('202300102','CS102','T01002',75,50),('202300103','CS103','T01003',85,60),
+('202300103','CS101','T01001',90,65),('202300104','CS102','T01002',55,45),
+('202300104','CS103','T01003',60,40),('202300105','CS101','T01001',72,48),
+('202300105','CS102','T01002',80,55),('202300201','MA201','T02001',85,90),
+('202300201','MA202','T02002',75,80),('202300202','PH301','T03001',90,92),
+('202300202','MA201','T02001',88,85),('202300301','CH401','T04001',78,82),
+('202300301','PH301','T03001',80,75),('202300302','ME501','T05001',88,75),
+('202300401','CH401','T04001',82,78),('202300501','ME501','T05001',90,85),
+('202300502','EC601','T06001',85,80),('202300601','EC601','T06001',75,70),
+('202300602','FL701','T07001',80,85),('202300701','FL701','T07001',85,90),
+('202300702','LA801','T08001',88,92),('202300801','LA801','T08001',90,85),
+('202300901','ME502','T05001',NULL,NULL),('202300902','PH302','T03001',NULL,NULL),
+('202301001','CH402','T04001',NULL,NULL),('202301002','EC602','T06001',NULL,NULL),
+('202310101','CS104','T01004',92,95),('202310101','CS105','T01003',90,88),
+('202310102','CS104','T01004',85,90),('202310102','CS105','T01003',88,85),
+('202310201','MA203','T02003',95,90),('202310301','PH302','T03001',87,92),
+('202310401','CH402','T04001',90,85),('202310501','ME502','T05001',92,88),
+('202310601','EC602','T06001',85,90),
+-- 08305001课程记录（用于操作4）
+('202300101','0830501','T01001',70,NULL),
+('202300102','0830501','T01001',80,NULL),
+('202300103','0830501','T01001',90,NULL),
+('202300104','0830501','T01001',60,NULL);
+
+-- 3. 执行操作命令
+-- (1) 建立计算机学院不及格学生视图
+CREATE OR REPLACE VIEW V_Computer_Fail AS
+SELECT s.Sno, s.Sname, s.Ssex, s.Sphone, c.Cname, 
+       ROUND(sc.Usual_grade*0.3 + sc.Final_grade*0.7, 1) AS Total
+FROM Student s
+JOIN SC sc ON s.Sno = sc.Sno
+JOIN Course c ON sc.Cno = c.Cno
+WHERE s.Dno = 1 
+  AND sc.Usual_grade IS NOT NULL 
+  AND sc.Final_grade IS NOT NULL
+  AND (sc.Usual_grade*0.3 + sc.Final_grade*0.7) < 60;
+
+-- 查看视图结果
+SELECT '操作1结果：计算机学院不及格学生视图' AS Operation;
+SELECT * FROM V_Computer_Fail;
+
+-- (2) 为每个学生插入未选课程
+INSERT INTO SC (Sno, Cno, Tno)
+SELECT s.Sno, c.Cno, 
+  (SELECT Tno FROM Teacher WHERE Dno = c.Dno ORDER BY RAND() LIMIT 1)
+FROM Student s
+CROSS JOIN Course c
+WHERE NOT EXISTS (
+  SELECT 1 FROM SC 
+  WHERE SC.Sno = s.Sno AND SC.Cno = c.Cno
+);
+
+-- 验证插入结果
+SELECT '操作2结果：新增选课记录数' AS Operation;
+SELECT COUNT(*) AS 新增记录数 FROM SC WHERE Usual_grade IS NULL AND Final_grade IS NULL;
+
+-- (3) 查询年龄>所有女生的男生
+SELECT '操作3结果：年龄大于所有女生的男生' AS Operation;
+SELECT Sname, Sage
+FROM Student
+WHERE Ssex = '男'
+  AND Sage > ALL (SELECT Sage FROM Student WHERE Ssex = '女');
+
+-- (4) 修改08305001课程平时成绩
+UPDATE SC
+SET Usual_grade = 
+  CASE 
+    WHEN Usual_grade <= 75 THEN Usual_grade * 1.05
+    ELSE Usual_grade * 1.04
+  END
+WHERE Cno = '0830501';
+
+-- 查看修改结果
+SELECT '操作4结果：修改后的08305001课程成绩' AS Operation;
+SELECT Sno, Usual_grade 
+FROM SC 
+WHERE Cno = '0830501';
+
+-- (5) 删除没有开课的学院
+DELETE FROM Department
+WHERE Dno NOT IN (SELECT DISTINCT Dno FROM Course WHERE Dno IS NOT NULL);
+
+-- 验证删除结果
+SELECT '操作5结果：剩余学院列表' AS Operation;
+SELECT Dno, Dname FROM Department;
+
+-- (6) 查询成绩等级分布
+SELECT '操作6结果：成绩等级分布' AS Operation;
+SELECT 
+  CASE
+    WHEN total >= 90 THEN '优'
+    WHEN total >= 80 THEN '良'
+    WHEN total >= 70 THEN '中'
+    WHEN total >= 60 THEN '及格'
+    ELSE '不及格'
+  END AS 等级,
+  COUNT(*) AS 人数
+FROM (
+  SELECT ROUND(Usual_grade*0.3 + Final_grade*0.7, 1) AS total
+  FROM SC
+  WHERE Usual_grade IS NOT NULL 
+    AND Final_grade IS NOT NULL
+) AS grades
+GROUP BY 等级
+ORDER BY FIELD(等级, '优','良','中','及格','不及格');
+
+-- 数据库统计信息
+SELECT '数据库统计' AS Info;
+SELECT 
+  (SELECT COUNT(*) FROM Department) AS 学院数,
+  (SELECT COUNT(*) FROM Student) AS 学生数,
+  (SELECT COUNT(*) FROM Course) AS 课程数,
+  (SELECT COUNT(*) FROM Teacher) AS 教师数,
+  (SELECT COUNT(*) FROM SC) AS 选课记录数;
+
+-----------------------
+研讨题
+-----------------------
+4
+-- 1. 修改学生表添加状态字段
+ALTER TABLE Student ADD COLUMN Status VARCHAR(10) DEFAULT '正常' CHECK (Status IN ('正常', '试读', '退学'));
+
+-- 2. 在选课表中添加学期字段
+ALTER TABLE SC ADD COLUMN Semester VARCHAR(15) NOT NULL DEFAULT '2023-2024-1';
+
+-- 3. 更新现有选课记录的学期信息
+UPDATE SC SET Semester = CASE 
+    WHEN RAND() < 0.3 THEN '2022-2023-2'  -- 30%为上学期
+    ELSE '2023-2024-1'                     -- 70%为最近学期
+END;
+
+-- 4. 创建视图计算学生学期学分情况
+CREATE VIEW V_Student_Credits AS
+SELECT 
+    s.Sno,
+    s.Sname,
+    sc.Semester,
+    SUM(c.Credit) AS Total_Credits,
+    SUM(CASE WHEN (sc.Usual_grade * 0.3 + sc.Final_grade * 0.7) < 60 THEN c.Credit ELSE 0 END) AS Fail_Credits
+FROM Student s
+JOIN SC sc ON s.Sno = sc.Sno
+JOIN Course c ON sc.Cno = c.Cno
+WHERE sc.Usual_grade IS NOT NULL 
+  AND sc.Final_grade IS NOT NULL
+GROUP BY s.Sno, sc.Semester;
+
+-- 5. 更新试读状态
+UPDATE Student
+SET Status = '试读'
+WHERE Sno IN (
+    SELECT Sno
+    FROM V_Student_Credits
+    WHERE Semester = '2023-2024-1'  -- 最近学期
+      AND Fail_Credits >= Total_Credits * 0.5
+);
+
+-- 6. 查看试读学生名单
+SELECT '试读学生名单' AS Result;
+SELECT 
+    s.Sno, 
+    s.Sname, 
+    d.Dname AS College,
+    v.Total_Credits,
+    v.Fail_Credits,
+    ROUND(v.Fail_Credits * 100.0 / v.Total_Credits, 1) AS Fail_Percent
+FROM Student s
+JOIN V_Student_Credits v ON s.Sno = v.Sno
+JOIN Department d ON s.Dno = d.Dno
+WHERE s.Status = '试读'
+  AND v.Semester = '2023-2024-1';
+
+-- 7. 查看所有学生状态分布
+SELECT '学生状态统计' AS Result;
+SELECT 
+    Status,
+    COUNT(*) AS Student_Count
+FROM Student
+GROUP BY Status;
+
+6
+----------------------------------------------------------
+-- 准备工作：添加必要数据和视图
+----------------------------------------------------------
+USE school;
+
+-- 添加系统结构课程
+INSERT INTO Course (Cno, Cname, Credit, Dno)
+VALUES ('08305003', '系统结构', 3, 1)
+ON DUPLICATE KEY UPDATE Cname='系统结构';
+
+-- 添加测试选课记录
+INSERT INTO SC (Sno, Semester, Cno, Tno, Usual_grade, Final_grade) VALUES
+('202300101','2023-2024-1','08305003','T01001',65,NULL),
+('202300102','2023-2024-1','08305003','T01001',60,NULL),
+('202300103','2023-2024-1','08305003','T01001',NULL,NULL);
+
+-- 创建可更新视图
+CREATE OR REPLACE VIEW V_SystemStructure_Pending AS
+SELECT 
+    sc.Sno, 
+    sc.Semester,
+    sc.Cno,
+    sc.Tno,
+    sc.Usual_grade,
+    sc.Final_grade
+FROM SC sc
+JOIN Course c ON sc.Cno = c.Cno
+WHERE c.Cname = '系统结构'
+  AND sc.Final_grade IS NULL
+WITH CHECK OPTION;
+
+----------------------------------------------------------
+-- 执行更新命令并验证
+----------------------------------------------------------
+-- 命令1：尝试插入非法课程
+SELECT '=== 命令1执行结果 ===' AS Log;
+INSERT INTO V_SystemStructure_Pending (Sno, Semester, Cno, Tno, Usual_grade, Final_grade)
+VALUES ('1107', '2013-2014秋季', '08305004', '0101', NULL, NULL);
+
+-- 命令2：尝试插入非法课程
+SELECT '=== 命令2执行结果 ===' AS Log;
+INSERT INTO V_SystemStructure_Pending (Sno, Semester, Cno, Tno, Usual_grade, Final_grade)
+VALUES ('1107', '2012-2013冬季', '08305002', '0102', NULL, NULL);
+
+-- 命令3：更新平时成绩
+SELECT '=== 命令3执行结果 ===' AS Log;
+UPDATE V_SystemStructure_Pending
+SET Usual_grade = LEAST(COALESCE(Usual_grade, 0) + 10, 100);
+
+-- 查看最终视图数据
+SELECT '=== 视图最终数据 ===' AS Log;
+SELECT * FROM V_SystemStructure_Pending;

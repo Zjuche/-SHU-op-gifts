@@ -1,0 +1,100 @@
+==================================================
+《计算机安全与保密技术》期末考核 - Python版终极操作手册
+==================================================
+
+【⚠️ 重要提示】
+1. Windows 下运行 Python 通常用 `python`，Ubuntu 下用 `python3`。
+2. 所有指令请在包含对应代码的文件夹内打开终端执行。
+3. 如果图形界面闪退报错（X Error: BadLength），请执行第一步中【Ubuntu 修复图形界面】的指令。
+
+--------------------------------------------------
+第一部分：环境准备工作（请提前做好，仅需做一次）
+--------------------------------------------------
+
+[环境: Windows 10] 安装加密库 (解决 cffi 和 OpenSSL 报错)
+--------------------------------------------------
+pip install cryptography==38.0.4 -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+[环境: Ubuntu 20.04] 安装基础依赖库 (解决 tkinter 缺失)
+--------------------------------------------------
+sudo apt update
+sudo apt install -y python3-cryptography python3-tk
+
+[环境: Ubuntu 20.04] 修复图形界面闪退问题 (解决 X Error: BadLength)
+--------------------------------------------------
+# 删除导致渲染崩溃的彩色 Emoji 字体
+sudo apt remove --purge fonts-noto-color-emoji
+sudo apt install unifont
+
+
+--------------------------------------------------
+第二部分：生成测试数据（关键靶子）
+--------------------------------------------------
+
+[环境: 通用] 1. 生成 C1 聊天用的密钥
+--------------------------------------------------
+[Windows] python keygen.py
+[Ubuntu]  python3 keygen.py
+*(运行后会生成 key.bin 和 badkey.bin)*
+
+[环境: Ubuntu 20.04] 2. 提取真实的系统账号密码 (靶子：seed，真实密码：dees)
+--------------------------------------------------
+sudo grep '^seed:' /etc/shadow > ~/Desktop/shadow.txt
+
+[环境: Ubuntu 20.04] 3. 生成伪造的测试用 Shadow 靶子 (靶子：testuser，密码：123456)
+--------------------------------------------------
+HASH=$(openssl passwd -6 123456)
+echo "testuser:$HASH:19000:0:99999:7:::" > ~/Desktop/shadow_test.txt
+
+
+--------------------------------------------------
+第三部分：任务一 C1 - 安全双向聊天
+--------------------------------------------------
+
+【1. 终端版演示 (开两个终端窗口并行)】
+[环境: Ubuntu 20.04] 或 [Windows 10]
+
+终端 1 (服务端，使用正确密钥)：
+python3 chat.py --mode server
+(Windows 换成 python chat.py --mode server)
+
+终端 2 (客户端，正常通信)：
+python3 chat.py --mode client
+(Windows 换成 python chat.py --mode client)
+
+终端 2 (客户端，演示解密失败，高分时刻)：
+python3 chat.py --mode client --key badkey.bin
+(Windows 换成 python chat.py --mode client --key badkey.bin)
+
+【2. 图形化界面演示 (弹窗选择，非常直观)】
+[环境: Ubuntu 20.04]
+python3 chat_gui.py
+(操作说明：会弹出文件选择框，选 key.bin 或 badkey.bin，然后选择服务端/客户端)
+
+
+--------------------------------------------------
+第四部分：任务二 C2 - 密码破解
+--------------------------------------------------
+
+【1. 终端基础版 (破解伪造靶子 testuser)】
+[环境: Ubuntu 20.04]
+python3 crack.py ~/Desktop/shadow_test.txt words.list
+
+【2. 终极混合破解版 (字典+暴力穷举，破解真实靶子 seed)】
+[环境: Ubuntu 20.04]
+# 直接运行，程序会在字典未命中后，自动穷举 1-4 位字母，得出 dees
+python3 crack_ultimate.py ~/Desktop/shadow.txt words.list
+
+【3. GUI图形化版 (多线程+日志审计，演示工程能力)】
+[环境: Ubuntu 20.04]
+python3 crack_gui.py
+(操作说明：点击“浏览”选择 ~/Desktop/shadow_test.txt 和 words.list，点击开始)
+(破解完成后，在终端输入 ls 可看到自动生成的 audit_log_时间.txt 日志文件)
+
+
+--------------------------------------------------
+第五部分：机房实操避坑指南
+--------------------------------------------------
+1. 如果机房电脑（Windows）装库卡住，直接用自己的电脑演示。
+2. 如果 Ubuntu 的共享文件夹报错无权限，执行：sudo usermod -aG vboxsf $USER 然后重启虚拟机。
+3. 演示结束后，记得把桌面上的 shadow.txt 删掉，保护真实系统环境。

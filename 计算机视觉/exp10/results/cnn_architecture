@@ -1,0 +1,185 @@
+digraph {
+	graph [size="13.65,13.65"]
+	node [align=left fontname=monospace fontsize=10 height=0.2 ranksep=0.1 shape=box style=filled]
+	1772743443472 [label="
+ (1, 10)" fillcolor=darkolivegreen1]
+	1773582202912 -> 1773563909920 [dir=none]
+	1773563909920 [label="result
+ (1, 10)" fillcolor=orange]
+	1773582202912 [label="SoftmaxBackward0
+----------------------
+dim   :              1
+result: [saved tensor]"]
+	1773554734160 -> 1773582202912
+	1773554734160 -> 1772743443552 [dir=none]
+	1772743443552 [label="mat1
+ (1, 128)" fillcolor=orange]
+	1773554734160 -> 1772743450352 [dir=none]
+	1772743450352 [label="mat2
+ (128, 10)" fillcolor=orange]
+	1773554734160 [label="AddmmBackward0
+--------------------------------
+alpha           :              1
+beta            :              1
+mat1            : [saved tensor]
+mat1_sym_sizes  :       (1, 128)
+mat1_sym_strides:       (128, 1)
+mat2            : [saved tensor]
+mat2_sym_sizes  :      (128, 10)
+mat2_sym_strides:       (1, 128)"]
+	1773583234528 -> 1773554734160
+	1772743450832 [label="fc2.bias
+ (10)" fillcolor=lightblue]
+	1772743450832 -> 1773583234528
+	1773583234528 [label=AccumulateGrad]
+	1773583229728 -> 1773554734160
+	1773583229728 -> 1772743450112 [dir=none]
+	1772743450112 [label="result
+ (1, 128)" fillcolor=orange]
+	1773583229728 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	1772888727632 -> 1773583229728
+	1772888727632 -> 1772743450512 [dir=none]
+	1772743450512 [label="mat1
+ (1, 1568)" fillcolor=orange]
+	1772888727632 -> 1772743450032 [dir=none]
+	1772743450032 [label="mat2
+ (1568, 128)" fillcolor=orange]
+	1772888727632 [label="AddmmBackward0
+--------------------------------
+alpha           :              1
+beta            :              1
+mat1            : [saved tensor]
+mat1_sym_sizes  :      (1, 1568)
+mat1_sym_strides:      (1568, 1)
+mat2            : [saved tensor]
+mat2_sym_sizes  :    (1568, 128)
+mat2_sym_strides:      (1, 1568)"]
+	1773582292432 -> 1772888727632
+	1772743444032 [label="fc1.bias
+ (128)" fillcolor=lightblue]
+	1772743444032 -> 1773582292432
+	1773582292432 [label=AccumulateGrad]
+	1773582295408 -> 1772888727632
+	1773582295408 [label="ViewBackward0
+-----------------------------
+self_sym_sizes: (1, 32, 7, 7)"]
+	1772888515792 -> 1773582295408
+	1772888515792 -> 1772743449872 [dir=none]
+	1772743449872 [label="result1
+ (1, 32, 7, 7)" fillcolor=orange]
+	1772888515792 -> 1772743443632 [dir=none]
+	1772743443632 [label="self
+ (1, 32, 14, 14)" fillcolor=orange]
+	1772888515792 [label="MaxPool2DWithIndicesBackward0
+-----------------------------
+ceil_mode  :          False
+dilation   :         (1, 1)
+kernel_size:         (2, 2)
+padding    :         (0, 0)
+result1    : [saved tensor]
+self       : [saved tensor]
+stride     :         (2, 2)"]
+	1773582950192 -> 1772888515792
+	1773582950192 -> 1772743442912 [dir=none]
+	1772743442912 [label="result
+ (1, 32, 14, 14)" fillcolor=orange]
+	1773582950192 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	1773582567072 -> 1773582950192
+	1773582567072 -> 1772743444192 [dir=none]
+	1772743444192 [label="input
+ (1, 16, 14, 14)" fillcolor=orange]
+	1773582567072 -> 1772743444112 [dir=none]
+	1772743444112 [label="weight
+ (32, 16, 3, 3)" fillcolor=orange]
+	1773582567072 [label="ConvolutionBackward0
+----------------------------------
+bias_sym_sizes_opt:          (32,)
+dilation          :         (1, 1)
+groups            :              1
+input             : [saved tensor]
+output_padding    :         (0, 0)
+padding           :         (1, 1)
+stride            :         (1, 1)
+transposed        :          False
+weight            : [saved tensor]"]
+	1773561063136 -> 1773582567072
+	1773561063136 -> 1772743443792 [dir=none]
+	1772743443792 [label="result1
+ (1, 16, 14, 14)" fillcolor=orange]
+	1773561063136 -> 1772743450752 [dir=none]
+	1772743450752 [label="self
+ (1, 16, 28, 28)" fillcolor=orange]
+	1773561063136 [label="MaxPool2DWithIndicesBackward0
+-----------------------------
+ceil_mode  :          False
+dilation   :         (1, 1)
+kernel_size:         (2, 2)
+padding    :         (0, 0)
+result1    : [saved tensor]
+self       : [saved tensor]
+stride     :         (2, 2)"]
+	1773562586464 -> 1773561063136
+	1773562586464 -> 1773563850304 [dir=none]
+	1773563850304 [label="result
+ (1, 16, 28, 28)" fillcolor=orange]
+	1773562586464 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	1773535064368 -> 1773562586464
+	1773535064368 -> 1773563493136 [dir=none]
+	1773563493136 [label="input
+ (1, 1, 28, 28)" fillcolor=orange]
+	1773535064368 -> 1772743451152 [dir=none]
+	1772743451152 [label="weight
+ (16, 1, 3, 3)" fillcolor=orange]
+	1773535064368 [label="ConvolutionBackward0
+----------------------------------
+bias_sym_sizes_opt:          (16,)
+dilation          :         (1, 1)
+groups            :              1
+input             : [saved tensor]
+output_padding    :         (0, 0)
+padding           :         (1, 1)
+stride            :         (1, 1)
+transposed        :          False
+weight            : [saved tensor]"]
+	1773562590208 -> 1773535064368
+	1772743451152 [label="conv1.weight
+ (16, 1, 3, 3)" fillcolor=lightblue]
+	1772743451152 -> 1773562590208
+	1773562590208 [label=AccumulateGrad]
+	1773563820640 -> 1773535064368
+	1772743451072 [label="conv1.bias
+ (16)" fillcolor=lightblue]
+	1772743451072 -> 1773563820640
+	1773563820640 [label=AccumulateGrad]
+	1773534892176 -> 1773582567072
+	1772743444112 [label="conv2.weight
+ (32, 16, 3, 3)" fillcolor=lightblue]
+	1772743444112 -> 1773534892176
+	1773534892176 [label=AccumulateGrad]
+	1773554863600 -> 1773582567072
+	1772743450992 [label="conv2.bias
+ (32)" fillcolor=lightblue]
+	1772743450992 -> 1773554863600
+	1773554863600 [label=AccumulateGrad]
+	1773557639072 -> 1772888727632
+	1773557639072 [label=TBackward0]
+	1773582578688 -> 1773557639072
+	1772743450912 [label="fc1.weight
+ (128, 1568)" fillcolor=lightblue]
+	1772743450912 -> 1773582578688
+	1773582578688 [label=AccumulateGrad]
+	1773584177792 -> 1773554734160
+	1773584177792 [label=TBackward0]
+	1773557639696 -> 1773584177792
+	1772743443952 [label="fc2.weight
+ (10, 128)" fillcolor=lightblue]
+	1772743443952 -> 1773557639696
+	1773557639696 [label=AccumulateGrad]
+	1773582202912 -> 1772743443472
+}

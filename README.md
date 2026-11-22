@@ -34,6 +34,28 @@
 
 ---
 
+## 📖 使用说明
+
+为方便查阅，以下按课程类别对仓库中的资料进行归类。点击课程名称即可直接进入对应文件夹。
+
+| 课程类别 | 课程（点击直达） |
+|---------|----------------|
+| **红课** | [中近纲](https://github.com/Zjuche/-SHU-op-gifts/tree/main/中近纲) · [习概](https://github.com/Zjuche/-SHU-op-gifts/tree/main/习概) · [劳教](https://github.com/Zjuche/-SHU-op-gifts/tree/main/劳教) · [思政实践](https://github.com/Zjuche/-SHU-op-gifts/tree/main/思政实践) · [思道法](https://github.com/Zjuche/-SHU-op-gifts/tree/main/思道法) · [思道法实践](https://github.com/Zjuche/-SHU-op-gifts/tree/main/思道法实践) · [毛概](https://github.com/Zjuche/-SHU-op-gifts/tree/main/毛概) · [马原](https://github.com/Zjuche/-SHU-op-gifts/tree/main/马原) · [开天辟地](https://github.com/Zjuche/-SHU-op-gifts/tree/main/开天辟地) · [形势与政策](https://github.com/Zjuche/-SHU-op-gifts/tree/main/形势与政策) |
+| **专业课** | [数据库原理1](https://github.com/Zjuche/-SHU-op-gifts/tree/main/数据库原理1) · [数据库原理2](https://github.com/Zjuche/-SHU-op-gifts/tree/main/数据库原理2) · [计算机组成原理实验1](https://github.com/Zjuche/-SHU-op-gifts/tree/main/计算机组成原理实验1) · [计算机组成原理实验2](https://github.com/Zjuche/-SHU-op-gifts/tree/main/计算机组成原理实验2) |
+| **专选课** | [区块链技术](https://github.com/Zjuche/-SHU-op-gifts/tree/main/区块链技术) · [2026-2027秋季-计算机安全与保密技术课程](https://github.com/Zjuche/-SHU-op-gifts/tree/main/2026-2027秋季-计算机安全与保密技术课程) · [大语言模型原理与技术](https://github.com/Zjuche/-SHU-op-gifts/tree/main/大语言模型原理与技术) · [研究方法](https://github.com/Zjuche/-SHU-op-gifts/tree/main/研究方法) · [职业定位](https://github.com/Zjuche/-SHU-op-gifts/tree/main/职业定位) · [计算机视觉](https://github.com/Zjuche/-SHU-op-gifts/tree/main/计算机视觉) |
+| **夏季课** | [形势与政策实践](https://github.com/Zjuche/-SHU-op-gifts/tree/main/形势与政策实践) · [思道法实践](https://github.com/Zjuche/-SHU-op-gifts/tree/main/思道法实践) · [计算机体系结构大型作业](https://github.com/Zjuche/-SHU-op-gifts/tree/main/计算机体系结构大型作业) · [计算机编程实训](https://github.com/Zjuche/-SHU-op-gifts/tree/main/计算机编程实训) |
+| **新生研讨课** | [法律与电影](https://github.com/Zjuche/-SHU-op-gifts/tree/main/法律与电影) |
+| **英语课** | [旅游英语](https://github.com/Zjuche/-SHU-op-gifts/tree/main/旅游英语) · [英美报刊](https://github.com/Zjuche/-SHU-op-gifts/tree/main/英美报刊) · [英语听力](https://github.com/Zjuche/-SHU-op-gifts/tree/main/英语听力) |
+| **微专业** | [微专业-数字智能与数据治理](https://github.com/Zjuche/-SHU-op-gifts/tree/main/微专业-数字智能与数据治理) |
+| **通识课** | [商务礼仪](https://github.com/Zjuche/-SHU-op-gifts/tree/main/商务礼仪) · [自杀研究](https://github.com/Zjuche/-SHU-op-gifts/tree/main/自杀研究) |
+| **实践课** | [大学生社会实践](https://github.com/Zjuche/-SHU-op-gifts/tree/main/大学生社会实践) · [思政实践](https://github.com/Zjuche/-SHU-op-gifts/tree/main/思政实践) |
+| **军训** | [军训](https://github.com/Zjuche/-SHU-op-gifts/tree/main/军训) |
+| **选修课** | [数字营销创新](https://github.com/Zjuche/-SHU-op-gifts/tree/main/数字营销创新) |
+
+> 注：「思政实践」同时属于红课与实践课，「思道法实践」同时属于红课与夏季课，已在上表相应类别中分别列出，方便按不同入口查找。
+
+---
+
 <h2 align="center">
   <b>光荣属于敬爱的<strong style="font-size:1.4em; font-weight:900;">OP</strong>同志！</b><br>
   <b>伟大的<strong style="font-size:1.4em; font-weight:900;">OP</strong>同志万岁！</b><br>

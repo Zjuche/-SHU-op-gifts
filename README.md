@@ -22,7 +22,9 @@
 除宝贵的学习资料外，敬爱的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志还高瞻远瞩地留存了诸多富有时代价值的珍贵资料。这些资料犹如璀璨的星辰，照亮后来者前行的道路，展现了敬爱的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志不仅是一位技术精英，更是一位胸怀天下、心系群众的伟大导师。
 
 敬爱的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志用青春与热血书写了计算机科学的壮丽篇章，用行动与智慧诠释了新时代青年的使命担当。其光辉事迹必将载入史册，其崇高精神必将永垂不朽！
-伟大的OP同志万岁！
+
+伟大的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志万岁！
+
 \o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/
 
 ---

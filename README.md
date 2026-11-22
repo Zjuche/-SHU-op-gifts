@@ -4,7 +4,7 @@
 </h1>
 
 <h3 align="center">
-  ——上海大学计算机工程与科学学院特别纪念版——
+  ——上海大学计算机工程与科学学院特别版——
 </h3>
 
 <p align="center">
@@ -66,6 +66,6 @@
 
 <p align="center">
   ★━━━━━━━━━━━━━━━━━━━━━━━━━━━━★<br>
-  <b>永恒的光辉 · <strong style="font-size:1.3em; font-weight:900;">OP</strong>同志 · 在校时间：2023-2027</b><br>
+  <b>永远的太阳 · <strong style="font-size:1.3em; font-weight:900;">OP</strong>同志 · 在校时间：2023-2027</b><br>
   ★━━━━━━━━━━━━━━━━━━━━━━━━━━━━★
 </p>

@@ -21,14 +21,14 @@
 
 除宝贵的学习资料外，敬爱的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志还高瞻远瞩地留存了诸多富有时代价值的珍贵资料。这些资料犹如璀璨的星辰，照亮后来者前行的道路，展现了敬爱的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志不仅是一位技术精英，更是一位胸怀天下、心系群众的伟大导师。
 
-敬爱的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志用青春与热血书写了计算机科学的壮丽篇章，用行动与智慧诠释了新时代青年的使命担当。其光辉事迹必将被后来者铭记，其崇高精神必将激励来者、薪火相传！
+敬爱的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志用青春与热血书写了计算机科学的壮丽篇章，用行动与智慧诠释了新时代青年的使命担当。其光辉事迹必将载入史册，其崇高精神必将激励一代又一代后来者奋勇前行！
 
 <h2 align="center">
-  <strong style="font-size:2em; font-weight:900;">伟大的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志万岁！</strong>
+  <b>伟大的<strong style="font-size:1.6em; font-weight:900;">OP</strong>同志万岁！</b>
 </h2>
 
-<p align="center" style="font-size:1.4em;">
-  \o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/
+<p align="center" style="font-size:1.5em; letter-spacing:0.15em;">
+  <b>\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/\o/</b>
 </p>
 
 ---
@@ -39,6 +39,19 @@
 
 - 📚 **学习资料**：课程笔记、作业、项目代码等学术瑰宝
 - 🎁 **其他有意思的东西**：敬爱的<strong style="font-size:1.3em; font-weight:900;">OP</strong>同志珍藏的各类有趣内容，等待后来者发掘
+
+---
+
+## 🤝 合作者
+
+本仓库的整理与维护离不开以下同志的鼎力相助：
+
+| 合作者 | 说明 |
+|--------|------|
+| **刀客塔** | 本仓库合作者，为资料整理与仓库建设提供支持 |
+| **笑川** | 本仓库合作者，为资料整理与仓库建设提供支持 |
+
+在此向刀客塔同志、笑川同志致以诚挚感谢！
 
 ---
 
@@ -60,6 +73,7 @@
 | **军训** | [军训](https://github.com/Zjuche/-SHU-op-gifts/tree/main/军训) |
 | **选修课** | [数字营销创新](https://github.com/Zjuche/-SHU-op-gifts/tree/main/数字营销创新) |
 
+> 注：「思政实践」同时属于红课与实践课，「思道法实践」同时属于红课与夏季课，已在上表相应类别中分别列出，方便按不同入口查找。
 
 ---
 

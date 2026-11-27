@@ -1,0 +1,297 @@
+#include <algorithm>
+#include <cctype>
+#include <exception>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+namespace fs = std::filesystem;
+
+struct Token {
+    string type;
+    string value;
+};
+
+class Lexer {
+private:
+    string src;
+    size_t pos;
+    vector<Token> tokens;
+    vector<string> errors;
+    map<string, string> keywords;
+    map<char, string> singleCharTokens;
+
+public:
+    Lexer(const string &input) : src(input), pos(0) {
+        keywords["begin"] = "beginsym";
+        keywords["call"] = "callsym";
+        keywords["const"] = "constsym";
+        keywords["do"] = "dosym";
+        keywords["end"] = "endsym";
+        keywords["if"] = "ifsym";
+        keywords["odd"] = "oddsym";
+        keywords["procedure"] = "proceduresym";
+        keywords["read"] = "readsym";
+        keywords["then"] = "thensym";
+        keywords["var"] = "varsym";
+        keywords["while"] = "whilesym";
+        keywords["write"] = "writesym";
+
+        singleCharTokens['+'] = "plus";
+        singleCharTokens['-'] = "minus";
+        singleCharTokens['*'] = "times";
+        singleCharTokens['/'] = "slash";
+        singleCharTokens['='] = "eql";
+        singleCharTokens['#'] = "neq";
+        singleCharTokens['('] = "lparen";
+        singleCharTokens[')'] = "rparen";
+        singleCharTokens[','] = "comma";
+        singleCharTokens[';'] = "semicolon";
+        singleCharTokens['.'] = "period";
+    }
+
+    vector<Token> tokenize() {
+        while (pos < src.size()) {
+            unsigned char ch = static_cast<unsigned char>(src[pos]);
+
+            if (isspace(ch)) {
+                pos++;
+                continue;
+            }
+
+            if (isalpha(ch)) {
+                readWord();
+            } else if (isdigit(ch)) {
+                readNumber();
+            } else if (src[pos] == ':') {
+                readColonToken();
+            } else if (src[pos] == '<') {
+                readLessToken();
+            } else if (src[pos] == '>') {
+                readGreaterToken();
+            } else if (singleCharTokens.count(src[pos])) {
+                Token token;
+                token.type = singleCharTokens[src[pos]];
+                token.value = string(1, src[pos]);
+                tokens.push_back(token);
+                pos++;
+            } else {
+                errors.push_back("Lexical error: unknown character '" + string(1, src[pos]) +
+                                 "' at position " + numberToString(pos));
+                pos++;
+            }
+        }
+
+        return tokens;
+    }
+
+    const vector<string> &getErrors() const {
+        return errors;
+    }
+
+private:
+    void readWord() {
+        size_t start = pos;
+        while (pos < src.size()) {
+            unsigned char ch = static_cast<unsigned char>(src[pos]);
+            if (!isalpha(ch) && !isdigit(ch)) {
+                break;
+            }
+            pos++;
+        }
+
+        string word = src.substr(start, pos - start);
+        string lowerWord = word;
+        transform(lowerWord.begin(), lowerWord.end(), lowerWord.begin(),
+                  toLowerChar);
+
+        if (keywords.count(lowerWord)) {
+            Token token;
+            token.type = keywords[lowerWord];
+            token.value = lowerWord;
+            tokens.push_back(token);
+        } else {
+            Token token;
+            token.type = "ident";
+            token.value = lowerWord;
+            tokens.push_back(token);
+        }
+    }
+
+    void readNumber() {
+        size_t start = pos;
+        while (pos < src.size() && isdigit(static_cast<unsigned char>(src[pos]))) {
+            pos++;
+        }
+        Token token;
+        token.type = "number";
+        token.value = src.substr(start, pos - start);
+        tokens.push_back(token);
+    }
+
+    void readColonToken() {
+        if (pos + 1 < src.size() && src[pos + 1] == '=') {
+            Token token;
+            token.type = "becomes";
+            token.value = ":=";
+            tokens.push_back(token);
+            pos += 2;
+            return;
+        }
+
+        errors.push_back("Lexical error: ':' must be followed by '=' at position " +
+                         numberToString(pos));
+        pos++;
+    }
+
+    void readLessToken() {
+        if (pos + 1 < src.size() && src[pos + 1] == '=') {
+            Token token;
+            token.type = "leq";
+            token.value = "<=";
+            tokens.push_back(token);
+            pos += 2;
+        } else {
+            Token token;
+            token.type = "lss";
+            token.value = "<";
+            tokens.push_back(token);
+            pos++;
+        }
+    }
+
+    void readGreaterToken() {
+        if (pos + 1 < src.size() && src[pos + 1] == '=') {
+            Token token;
+            token.type = "geq";
+            token.value = ">=";
+            tokens.push_back(token);
+            pos += 2;
+        } else {
+            Token token;
+            token.type = "gtr";
+            token.value = ">";
+            tokens.push_back(token);
+            pos++;
+        }
+    }
+
+    static char toLowerChar(char c) {
+        return static_cast<char>(tolower(static_cast<unsigned char>(c)));
+    }
+
+    static string numberToString(size_t value) {
+        ostringstream out;
+        out << value;
+        return out.str();
+    }
+};
+
+string readFile(const string &filename) {
+    ifstream fin(filename);
+    if (!fin.is_open()) {
+        throw runtime_error("Cannot open input file: " + filename);
+    }
+
+    return string((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
+}
+
+void writeTokens(const string &filename, const vector<Token> &tokens) {
+    ofstream fout(filename);
+    if (!fout.is_open()) {
+        throw runtime_error("Cannot open output file: " + filename);
+    }
+
+    size_t i;
+    for (i = 0; i < tokens.size(); ++i) {
+        fout << "(" << tokens[i].type << "," << tokens[i].value << ")" << '\n';
+    }
+}
+
+vector<fs::path> collectInputFiles(const fs::path &inputDir) {
+    vector<fs::path> inputFiles;
+    fs::directory_iterator it(inputDir);
+    fs::directory_iterator end;
+
+    while (it != end) {
+        if (fs::is_regular_file(it->path()) &&
+            it->path().filename().string().find("_input.txt") != string::npos) {
+            inputFiles.push_back(it->path());
+        }
+        ++it;
+    }
+
+    sort(inputFiles.begin(), inputFiles.end());
+    return inputFiles;
+}
+
+string replaceSuffix(const string &filename, const string &from, const string &to) {
+    size_t pos = filename.rfind(from);
+    if (pos == string::npos) {
+        return filename + to;
+    }
+    return filename.substr(0, pos) + to;
+}
+
+int main() {
+    try {
+        const fs::path inputDir = "test_cases";
+        const fs::path outputDir = "test_results";
+
+        if (!fs::exists(inputDir) || !fs::is_directory(inputDir)) {
+            cerr << "Input directory not found: " << inputDir.string() << endl;
+            return 1;
+        }
+
+        fs::create_directories(outputDir);
+
+        vector<fs::path> inputFiles = collectInputFiles(inputDir);
+        if (inputFiles.empty()) {
+            cerr << "No files matching *_input.txt were found in "
+                 << inputDir.string() << endl;
+            return 1;
+        }
+
+        size_t i;
+        for (i = 0; i < inputFiles.size(); ++i) {
+            const fs::path &inputFile = inputFiles[i];
+            string inputName = inputFile.filename().string();
+            fs::path outputFile = outputDir / replaceSuffix(inputName, "_input.txt", "_output.txt");
+            fs::path errorFile = outputDir / replaceSuffix(inputName, "_input.txt", "_stderr.txt");
+
+            string input = readFile(inputFile.string());
+            Lexer lexer(input);
+            vector<Token> tokens = lexer.tokenize();
+            writeTokens(outputFile.string(), tokens);
+
+            ofstream ferr(errorFile.string());
+            if (!ferr.is_open()) {
+                throw runtime_error("Cannot open error file: " + errorFile.string());
+            }
+
+            const vector<string> &errors = lexer.getErrors();
+            size_t j;
+            for (j = 0; j < errors.size(); ++j) {
+                ferr << errors[j] << '\n';
+            }
+
+            cout << inputName << " -> " << outputFile.string();
+            if (errors.empty()) {
+                cout << " [OK]";
+            } else {
+                cout << " [errors -> " << errorFile.string() << "]";
+            }
+            cout << endl;
+        }
+    } catch (const exception &e) {
+        cerr << e.what() << endl;
+        return 1;
+    }
+
+    return 0;
+}

@@ -1,0 +1,3 @@
+(plus,+)
+(times,*)
+(ident,a)

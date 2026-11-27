@@ -1,0 +1,4 @@
+(lparen,()
+(ident,a)
+(plus,+)
+(ident,b)

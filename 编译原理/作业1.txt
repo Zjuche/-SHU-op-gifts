@@ -1,0 +1,37 @@
+VAR a, b, c, temp;
+
+BEGIN
+  ! 输入三个正整数
+  READ(a);
+  READ(b);
+  READ(c);
+
+  ! 第一步：确保a<=b
+  IF a > b THEN
+    BEGIN
+      temp := a;
+      a := b;
+      b := temp
+    END;
+
+  ! 第二步：确保a<=c（此时a已是a和b中的较小值）
+  IF a > c THEN
+    BEGIN
+      temp := a;
+      a := c;
+      c := temp
+    END;
+
+  ! 第三步：确保b<=c（此时a已是最小值）
+  IF b > c THEN
+    BEGIN
+      temp := b;
+      b := c;
+      c := temp
+    END;
+
+  ! 按顺序输出结果
+  WRITE(a);
+  WRITE(b);
+  WRITE(c)
+END.

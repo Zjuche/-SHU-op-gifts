@@ -1,0 +1,6 @@
+(minus,-)
+(ident,X1)
+(plus,+)
+(number,20)
+(div,/)
+(ident,A)
